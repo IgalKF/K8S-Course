@@ -1,0 +1,40 @@
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - my-network
+  njs-web-app:
+    build:
+      context: ./njs-web-app
+      dockerfile: Dockerfile
+    # ports:
+    #   - "8081:80"
+    volumes:
+      - ./njs-web-app/src:/usr/app/src:ro
+    depends_on:
+      - redis
+    networks:
+      - my-network
+  njs-gateway:
+    build:
+      context: ./njs-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./njs-gateway/src:/usr/app/src:ro
+    depends_on:
+      - njs-web-app
+    networks:
+      - my-network
+  redis-client:
+    image: redis/redisinsight:latest
+    ports:
+      - 5540:5540
+    networks:
+      - my-network
+networks:
+  my-network:
+    driver: bridge
